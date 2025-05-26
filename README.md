@@ -43,6 +43,7 @@ python App.py
 ```
 
 打开浏览器访问 [http://127.0.0.1:5000](http://127.0.0.1:5000)
+<img width="497" alt="image" src="https://github.com/user-attachments/assets/af8a01cc-6f4c-490a-ae38-df1647c10966" />
 
 ---
 
