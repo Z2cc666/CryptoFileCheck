@@ -1,5 +1,7 @@
 
 # SecureHashVerify
+<img width="720" alt="截屏2025-05-27 晚上7 55 19" src="https://github.com/user-attachments/assets/46b88b1f-6680-42d7-aa30-234599b66687" />
+
 
 > 基于 Python、Flask、RSA 和 SHA-256 的文件完整性验证系统。
 
@@ -43,7 +45,6 @@ python App.py
 ```
 
 打开浏览器访问 [http://127.0.0.1:5000](http://127.0.0.1:5000)
-<img width="497" alt="image" src="https://github.com/user-attachments/assets/af8a01cc-6f4c-490a-ae38-df1647c10966" />
 
 ---
 
@@ -81,6 +82,15 @@ pip install flask cryptography
 ```
 
 ---
+##界面功能演示
+<img width="720" alt="截屏2025-05-27 晚上7 55 19" src="https://github.com/user-attachments/assets/ccb27fa5-e1c3-4191-a6e5-77b36535618a" />
+<img width="726" alt="截屏2025-05-27 晚上7 55 30" src="https://github.com/user-attachments/assets/70698127-ca7c-4601-8b40-6a6983525be2" />
+<img width="733" alt="截屏2025-05-27 晚上8 12 38" src="https://github.com/user-attachments/assets/0bba2f52-1f4a-4933-a81d-4d62c1b33c64" />
+<img width="739" alt="截屏2025-05-27 晚上8 12 50" src="https://github.com/user-attachments/assets/4c15b16a-8599-4ba2-a823-275c1bdc087b" />
+<img width="731" alt="截屏2025-05-27 晚上8 12 56" src="https://github.com/user-attachments/assets/6c9976ce-561b-4c1a-b5bf-8290ead6305a" />
+<img width="736" alt="截屏2025-05-27 晚上8 13 04" src="https://github.com/user-attachments<img width="633" alt="截屏2025-05-27 晚上8 13 10" src="https://github.com/user-attachments/assets/d708517a-3f96-4d88-9803-5c7c082c469e" />
+/assets/23b3a9ba-cb27-40a5-b5cf-ecbb26150d00" />
+<img width="641" alt="截屏2025-05-27 晚上8 13 16" src="https://github.com/user-attachments/assets/e40ff3d4-ecd1-45b6-a65d-21237c47faab" />
 
 ## 未来改进
 
