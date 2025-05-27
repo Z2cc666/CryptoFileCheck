@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件完整性验证系统</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #282c34;
+            color: #eee;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #3a3f51;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #61dafb;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #444a66;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+        }
+
+        .card h3 {
+            color: #61dafb;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0 15px 0;
+            background: #555a7e;
+            border: none;
+            border-radius: 4px;
+            color: #eee;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #61dafb;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: #282c34;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #21a1f1;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .success {
+            background: #4caf50;
+            color: white;
+            border-left: 5px solid #2e7d32;
+        }
+
+        .error {
+            background: #f44336;
+            color: white;
+            border-left: 5px solid #c62828;
+        }
+
+        .warning {
+            background: #ff9800;
+            color: white;
+            border-left: 5px solid #f57c00;
+        }
+
+        .file-info {
+            background: #555a7e;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .file-info div {
+            margin-bottom: 5px;
+        }
+
+        .hash-display {
+            word-break: break-all;
+            color: #ffeb3b;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #4caf50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #45a049;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #61dafb;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #61dafb;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hint {
+            color: #aaa;
+            font-size: 0.9em;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .feature-box {
+            background: #555a7e;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .feature-box h4 {
+            color: #61dafb;
+            margin-top: 0;
+        }
+
+        .feature-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .feature-box li {
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        /* 演示相关样式 */
+        .demo-section {
+            margin-top: 15px;
+        }
+
+        .demo-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .step {
+            background: #555a7e;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #61dafb;
+        }
+
+        .step h4 {
+            color: #61dafb;
+            margin-top: 0;
+        }
+
+        .step-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        .step-btn:hover {
+            background: #45a049;
+        }
+
+        #demoContent {
+            width: 100%;
+            height: 150px;
+            background: #3a3f51;
+            color: #eee;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .hash-result {
+            background: #3a3f51;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .signature-display {
+            background: #2e4057;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border: 2px solid #4caf50;
+        }
+
+        .tamper-demo {
+            margin: 15px 0;
+        }
+
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .content-box {
+            background: #3a3f51;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .content-box.tampered {
+            background: #4a2c2c;
+            border: 2px solid #f44336;
+        }
+
+        .verification-results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .verify-result {
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .original-verify {
+            background: #2e5233;
+            border: 2px solid #4caf50;
+        }
+
+        .tampered-verify {
+            background: #5c2e2e;
+            border: 2px solid #f44336;
+        }
+
+        /* 前景展示样式 */
+        .prospects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .prospect-item {
+            background: #555a7e;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            transition: transform 0.3s ease;
+        }
+
+        .prospect-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .prospect-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .prospect-content h4 {
+            color: #61dafb;
+            margin: 0 0 10px 0;
+        }
+
+        .prospect-content p {
+            color: #ccc;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .market-analysis {
+            background: #2e4057;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+
+        .market-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #3a4a5c;
+            border-radius: 6px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4caf50;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .tech-features {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .tech-item {
+            background: #3a3f51;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #61dafb;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 文件完整性验证系统</h1>
+
+        <!-- 文件签名部分 -->
+        <div class="card">
+            <h3>🔏 生成数字签名</h3>
+            <p class="hint">上传文件生成RSA数字签名，保证文件完整性</p>
+            
+            <form id="signForm" enctype="multipart/form-data">
+                <label for="signFile">选择要签名的文件:</label>
+                <input type="file" id="signFile" name="file" required>
+                <button type="submit" id="signBtn">🔏 生成签名</button>
+            </form>
+
+            <div class="loading" id="signLoading">
+                <div class="spinner"></div>正在生成签名...
+            </div>
+
+            <div id="signResult"></div>
+        </div>
+
+        <!-- 文件验证部分 -->
+        <div class="card">
+            <h3>🔍 验证文件完整性</h3>
+            <p class="hint">上传原始文件和签名文件进行完整性验证</p>
+            
+            <form id="verifyForm" enctype="multipart/form-data">
+                <label for="verifyFile">选择原始文件:</label>
+                <input type="file" id="verifyFile" name="file" required>
+                
+                <label for="signatureFile">选择签名文件 (.sig):</label>
+                <input type="file" id="signatureFile" name="signature" accept=".sig" required>
+                
+                <button type="submit" id="verifyBtn">🔍 验证签名</button>
+            </form>
+
+            <div class="loading" id="verifyLoading">
+                <div class="spinner"></div>正在验证签名...
+            </div>
+
+            <div id="verifyResult"></div>
+        </div>
+
+        <!-- 操作演示部分 -->
+        <div class="card">
+            <h3>🎬 操作演示</h3>
+            <div class="demo-section">
+                <button id="demoBtn" class="demo-button">🚀 开始演示</button>
+                <div class="demo-steps" id="demoSteps" style="display: none;">
+                    <div class="step" id="step1">
+                        <h4>步骤 1: 创建示例文件</h4>
+                        <textarea id="demoContent" placeholder="输入文件内容进行演示...">这是一个重要的商业合同文档。
+合同编号: CONTRACT-2024-001
+签署日期: 2024年5月27日
+甲方: ABC科技有限公司
+乙方: XYZ贸易公司
+
+合同条款:
+1. 合同总金额: ¥1,000,000
+2. 付款方式: 分期付款
+3. 交付时间: 2024年12月31日
+
+特别声明: 本合同一经签署不得随意修改</textarea>
+                        <button onclick="createDemoFile()" class="step-btn">创建文件</button>
+                    </div>
+                    
+                    <div class="step" id="step2" style="display: none;">
+                        <h4>步骤 2: 查看文件哈希</h4>
+                        <div id="originalHash" class="hash-result"></div>
+                        <button onclick="signDemoFile()" class="step-btn">生成数字签名</button>
+                    </div>
+                    
+                    <div class="step" id="step3" style="display: none;">
+                        <h4>步骤 3: 数字签名结果</h4>
+                        <div id="signatureResult" class="signature-display"></div>
+                        <button onclick="modifyDemo()" class="step-btn">模拟文件篡改</button>
+                    </div>
+                    
+                    <div class="step" id="step4" style="display: none;">
+                        <h4>步骤 4: 文件被篡改后</h4>
+                        <div class="tamper-demo">
+                            <div class="before-after">
+                                <div class="before">
+                                    <h5>原始内容:</h5>
+                                    <div id="originalContent" class="content-box"></div>
+                                </div>
+                                <div class="after">
+                                    <h5>篡改后内容:</h5>
+                                    <div id="tamperedContent" class="content-box tampered"></div>
+                                </div>
+                            </div>
+                            <div id="tamperedHash" class="hash-result"></div>
+                        </div>
+                        <button onclick="verifyDemo()" class="step-btn">验证签名</button>
+                    </div>
+                    
+                    <div class="step" id="step5" style="display: none;">
+                        <h4>步骤 5: 验证结果对比</h4>
+                        <div class="verification-results">
+                            <div class="verify-result original-verify">
+                                <h5>✅ 原始文件验证</h5>
+                                <div>状态: 签名有效</div>
+                                <div>完整性: 未被篡改</div>
+                            </div>
+                            <div class="verify-result tampered-verify">
+                                <h5>❌ 篡改文件验证</h5>
+                                <div>状态: 签名无效</div>
+                                <div>完整性: 检测到篡改</div>
+                            </div>
+                        </div>
+                        <button onclick="resetDemo()" class="step-btn">重新开始演示</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 应用前景部分 -->
+        <div class="card">
+            <h3>🚀 应用前景与发展方向</h3>
+            <div class="prospects-grid">
+                <div class="prospect-item">
+                    <div class="prospect-icon">📋</div>
+                    <div class="prospect-content">
+                        <h4>合同文档保护</h4>
+                        <p>保护法律合同、商业协议等重要文档的完整性，防止恶意篡改，为法律纠纷提供技术证据</p>
+                    </div>
+                </div>
+                
+                <div class="prospect-item">
+                    <div class="prospect-icon">🏥</div>
+                    <div class="prospect-content">
+                        <h4>医疗数据安全</h4>
+                        <p>确保电子病历、检测报告等医疗数据的完整性，符合HIPAA等医疗数据保护法规</p>
+                    </div>
+                </div>
+                
+                <div class="prospect-item">
+                    <div class="prospect-icon">🏛️</div>
+                    <div class="prospect-content">
+                        <h4>政府电子政务</h4>
+                        <p>保护政府文件、公告、法规等官方文档，确保公民获取的信息未被篡改</p>
+                    </div>
+                </div>
+                
+                <div class="prospect-item">
+                    <div class="prospect-icon">💰</div>
+                    <div class="prospect-content">
+                        <h4>金融交易记录</h4>
+                        <p>保护银行交易记录、审计报告、财务报表等金融数据的完整性和可信度</p>
+                    </div>
+                </div>
+                
+                <div class="prospect-item">
+                    <div class="prospect-icon">🔬</div>
+                    <div class="prospect-content">
+                        <h4>科研数据保护</h4>
+                        <p>确保实验数据、研究报告的完整性，防止科研造假，维护学术诚信</p>
+                    </div>
+                </div>
+                
+                <div class="prospect-item">
+                    <div class="prospect-icon">🌐</div>
+                    <div class="prospect-content">
+                        <h4>区块链集成</h4>
+                        <p>结合区块链技术，实现分布式的文件完整性验证，提供不可篡改的时间戳证明</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="market-analysis">
+                <h4>📊 市场前景分析</h4>
+                <div class="market-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">$156亿</div>
+                        <div class="stat-label">2024年全球数字签名市场规模</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">23.8%</div>
+                        <div class="stat-label">年复合增长率(2024-2030)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-label">企业认为数据完整性至关重要</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技术优势部分 -->
+        <div class="feature-box">
+            <h4>🛡️ 技术优势</h4>
+            <div class="tech-features">
+                <div class="tech-item">
+                    <strong>🔐 RSA-2048加密:</strong> 使用工业级2048位RSA密钥对，安全性达到政府级标准
+                </div>
+                <div class="tech-item">
+                    <strong>🔍 SHA-256哈希:</strong> 采用美国国家安全局设计的安全哈希算法，抗碰撞能力强
+                </div>
+                <div class="tech-item">
+                    <strong>🛡️ PSS填充方案:</strong> 概率签名方案，提供可证明的安全性保证
+                </div>
+                <div class="tech-item">
+                    <strong>⚡ 高性能处理:</strong> 优化算法实现，支持大文件快速签名验证
+                </div>
+                <div class="tech-item">
+                    <strong>🔄 自动化管理:</strong> 密钥自动生成与管理，降低人为错误风险
+                </div>
+                <div class="tech-item">
+                    <strong>📱 跨平台支持:</strong> 基于Web技术，支持所有主流操作系统和浏览器
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 文件签名处理
+        document.getElementById('signForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const signBtn = document.getElementById('signBtn');
+            const loading = document.getElementById('signLoading');
+            const result = document.getElementById('signResult');
+            
+            // 显示loading状态
+            signBtn.disabled = true;
+            loading.style.display = 'block';
+            result.innerHTML = '';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="result success">
+                            ✅ ${data.message}
+                            <div class="file-info">
+                                <div><strong>文件名:</strong> ${data.filename}</div>
+                                <div><strong>文件大小:</strong> ${data.filesize} 字节</div>
+                                <div><strong>SHA-256:</strong> <span class="hash-display">${data.hash}</span></div>
+                                <div><strong>签名文件:</strong> ${data.signature_file}</div>
+                            </div>
+                            <a href="/download/${data.signature_file}" class="download-btn">📥 下载签名文件</a>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="result error">❌ ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ 网络错误: ${error.message}</div>`;
+            } finally {
+                signBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 文件验证处理
+        document.getElementById('verifyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const verifyBtn = document.getElementById('verifyBtn');
+            const loading = document.getElementById('verifyLoading');
+            const result = document.getElementById('verifyResult');
+            
+            // 显示loading状态
+            verifyBtn.disabled = true;
+            loading.style.display = 'block';
+            result.innerHTML = '';
+            
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const resultClass = data.verified ? 'success' : 'warning';
+                    const icon = data.verified ? '✅' : '❌';
+                    
+                    result.innerHTML = `
+                        <div class="result ${resultClass}">
+                            ${icon} ${data.message}
+                            <div class="file-info">
+                                <div><strong>文件名:</strong> ${data.filename}</div>
+                                <div><strong>文件大小:</strong> ${data.filesize} 字节</div>
+                                <div><strong>SHA-256:</strong> <span class="hash-display">${data.hash}</span></div>
+                                <div><strong>验证状态:</strong> ${data.verified ? '通过' : '失败'}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `<div class="result error">❌ ${data.message}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="result error">❌ 网络错误: ${error.message}</div>`;
+            } finally {
+                verifyBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // 清除结果当文件改变时
+        document.getElementById('signFile').addEventListener('change', () => {
+            document.getElementById('signResult').innerHTML = '';
+        });
+
+        document.getElementById('verifyFile').addEventListener('change', () => {
+            document.getElementById('verifyResult').innerHTML = '';
+        });
+
+        document.getElementById('signatureFile').addEventListener('change', () => {
+            document.getElementById('verifyResult').innerHTML = '';
+        });
+
+        // 演示功能
+        let demoData = {
+            originalContent: '',
+            tamperedContent: '',
+            originalHash: '',
+            tamperedHash: '',
+            signature: ''
+        };
+
+        function startDemo() {
+            document.getElementById('demoSteps').style.display = 'block';
+            document.getElementById('demoBtn').textContent = '演示进行中...';
+            document.getElementById('demoBtn').disabled = true;
+        }
+
+        function createDemoFile() {
+            const content = document.getElementById('demoContent').value;
+            demoData.originalContent = content;
+            
+            // 模拟计算哈希
+            const hash = calculateSimpleHash(content);
+            demoData.originalHash = hash;
+            
+            document.getElementById('originalHash').innerHTML = `
+                <div><strong>文件内容长度:</strong> ${content.length} 字符</div>
+                <div><strong>SHA-256哈希:</strong> <span style="color: #ffeb3b;">${hash}</span></div>
+            `;
+            
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+
+        function signDemoFile() {
+            // 模拟生成数字签名
+            const signature = generateMockSignature(demoData.originalHash);
+            demoData.signature = signature;
+            
+            document.getElementById('signatureResult').innerHTML = `
+                <div style="color: #4caf50; font-weight: bold; margin-bottom: 10px;">✅ 数字签名生成成功</div>
+                <div><strong>签名算法:</strong> RSA-2048 + PSS填充</div>
+                <div><strong>签名长度:</strong> 256 字节</div>
+                <div><strong>签名摘要:</strong> <span style="color: #ffeb3b; font-family: monospace;">${signature.substring(0, 32)}...</span></div>
+                <div style="margin-top: 10px; padding: 10px; background: #2e4057; border-radius: 4px;">
+                    <div style="color: #61dafb; font-weight: bold;">🔐 加密签名数据 (部分显示):</div>
+                    <div style="font-family: monospace; font-size: 11px; word-break: break-all; color: #ffeb3b; margin-top: 5px;">
+                        ${signature}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'block';
+        }
+
+        function modifyDemo() {
+            // 模拟文件篡改
+            demoData.tamperedContent = demoData.originalContent.replace('¥1,000,000', '¥10,000,000');
+            demoData.tamperedContent = demoData.tamperedContent.replace('本合同一经签署不得随意修改', '本合同条款可根据实际情况调整');
+            
+            demoData.tamperedHash = calculateSimpleHash(demoData.tamperedContent);
+            
+            document.getElementById('originalContent').textContent = demoData.originalContent.substring(0, 150) + '...';
+            document.getElementById('tamperedContent').textContent = demoData.tamperedContent.substring(0, 150) + '...';
+            
+            document.getElementById('tamperedHash').innerHTML = `
+                <div style="color: #f44336;"><strong>⚠️ 检测到文件修改</strong></div>
+                <div><strong>原始哈希:</strong> <span style="color: #4caf50;">${demoData.originalHash}</span></div>
+                <div><strong>当前哈希:</strong> <span style="color: #f44336;">${demoData.tamperedHash}</span></div>
+                <div style="color: #ff9800; margin-top: 10px;"><strong>哈希值不匹配 - 文件已被篡改！</strong></div>
+            `;
+            
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step4').style.display = 'block';
+        }
+
+        function verifyDemo() {
+            document.getElementById('step4').style.display = 'none';
+            document.getElementById('step5').style.display = 'block';
+        }
+
+        function resetDemo() {
+            document.getElementById('demoSteps').style.display = 'none';
+            document.getElementById('demoBtn').textContent = '🚀 开始演示';
+            document.getElementById('demoBtn').disabled = false;
+            
+            // 重置所有步骤
+            for(let i = 1; i <= 5; i++) {
+                document.getElementById(`step${i}`).style.display = i === 1 ? 'block' : 'none';
+            }
+            
+            // 清空演示数据
+            demoData = {
+                originalContent: '',
+                tamperedContent: '',
+                originalHash: '',
+                tamperedHash: '',
+                signature: ''
+            };
+        }
+
+        // 简单哈希模拟函数 (仅用于演示)
+        function calculateSimpleHash(content) {
+            let hash = 0;
+            if (content.length === 0) return hash.toString(16).padStart(64, '0');
+            for (let i = 0; i < content.length; i++) {
+                const char = content.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // 转换为32位整数
+            }
+            // 生成类似SHA-256的64位十六进制字符串
+            const hashStr = Math.abs(hash).toString(16);
+            return (hashStr + '0'.repeat(64)).substring(0, 64);
+        }
+
+        // 模拟生成签名
+        function generateMockSignature(hash) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+            let signature = '';
+            for (let i = 0; i < 344; i++) { // Base64编码的256字节大约是344个字符
+                signature += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return signature;
+        }
+
+        // 演示按钮事件
+        document.getElementById('demoBtn').addEventListener('click', startDemo);
+    </script>
+</body>
+</html>
